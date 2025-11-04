@@ -1,0 +1,5 @@
+# Dependencies
+/server-app/node_modules
+
+# Environment variables
+/server-app/.env

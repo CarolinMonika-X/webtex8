@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Blood Donation App</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #fafafa;
+      margin: 0;
+      padding: 40px;
+      color: #333;
+    }
+    h1, h2 {
+      color: #d32f2f;
+      margin-bottom: 15px;
+    }
+    #donorForm, ul {
+      background: white;
+      box-shadow: 0 2px 8px rgba(220, 0, 50, 0.08);
+      padding: 22px;
+      border-radius: 8px;
+    }
+    #donorForm {
+      max-width: 440px;
+      margin-bottom: 28px;
+      display: grid;
+      grid-gap: 12px;
+    }
+    input, select {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    button {
+      padding: 8px 14px;
+      background: #d32f2f;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #b71c1c;
+    }
+    ul#donorList {
+      list-style: none;
+      padding: 0;
+      margin: 18px 0 0 0;
+      max-width: 540px;
+    }
+    ul#donorList li {
+      background: #fff8f8;
+      border-left: 5px solid #d32f2f;
+      margin-bottom: 14px;
+      padding: 15px 18px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .donor-details {
+      font-size: 17px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Blood Donation App</h1>
+  
+  <h2>Add Donor</h2>
+  <form id="donorForm">
+    <input name="name" placeholder="Name" required>
+    <select name="bloodGroup" required>
+      <option value="">Select Blood Group</option>
+      <option value="A+">A+</option>
+      <option value="A-">A-</option>
+      <option value="B+">B+</option>
+      <option value="B-">B-</option>
+      <option value="AB+">AB+</option>
+      <option value="AB-">AB-</option>
+      <option value="O+">O+</option>
+      <option value="O-">O-</option>
+    </select>
+    <input name="contact" placeholder="Contact Number" required>
+    <select name="city" required>
+      <option value="">Select City</option>
+      <option value="Delhi">Delhi</option>
+      <option value="Mumbai">Mumbai</option>
+      <option value="Bangalore">Bangalore</option>
+      <option value="Chennai">Chennai</option>
+      <option value="Kolkata">Kolkata</option>
+      <option value="Hyderabad">Hyderabad</option>
+      <option value="Ahmedabad">Ahmedabad</option>
+      <option value="Pune">Pune</option>
+    </select>
+    <button type="submit">Add Donor</button>
+  </form>
+  
+  <h2>All Donors</h2>
+  <button onclick="fetchDonors()">Refresh List</button>
+  <ul id="donorList"></ul>
+
+  <script>
+    const API_URL = 'http://localhost:3000/donors';
+
+    // Add donor
+    document.getElementById('donorForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const donor = {
+        name: form.name.value,
+        bloodGroup: form.bloodGroup.value,
+        contact: form.contact.value,
+        city: form.city.value
+      };
+      await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(donor)
+      });
+      form.reset();
+      fetchDonors();
+    };
+
+    // Fetch and display donors
+    async function fetchDonors() {
+      const res = await fetch(API_URL);
+      const donors = await res.json();
+      const list = document.getElementById('donorList');
+      list.innerHTML = '';
+      donors.forEach(donor => {
+        const li = document.createElement('li');
+        const details = document.createElement('span');
+        details.className = 'donor-details';
+        details.textContent = `${donor.name} (${donor.bloodGroup}) - ${donor.city}, ${donor.contact} `;
+        const delBtn = document.createElement('button');
+        delBtn.textContent = 'Delete';
+        delBtn.onclick = async () => {
+          await fetch(`${API_URL}/${donor._id}`, { method: 'DELETE' });
+          fetchDonors();
+        };
+        li.appendChild(details);
+        li.appendChild(delBtn);
+        list.appendChild(li);
+      });
+    }
+
+    // Initial load
+    fetchDonors();
+  </script>
+</body>
+</html>
